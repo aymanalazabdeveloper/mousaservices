@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>تقديم طلب جديد</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="simple-header"><a href="/" class="back">←</a><h1>تقديم طلب جديد</h1></header>
+
+<main class="form-page">
+  <div class="form-card">
+    <div class="section-label">بيانات المواطن</div>
+    <h2>أخبرنا بطلبك</h2>
+
+    <form id="requestForm">
+      <label>الاسم الكامل
+        <input name="name" required placeholder="اكتب الاسم بالكامل">
+      </label>
+
+      <label>رقم الهاتف
+        <input name="phone" required type="tel" placeholder="01xxxxxxxxx">
+      </label>
+
+      <label>نوع الطلب
+        <select name="type" required>
+          <option value="">اختر نوع الطلب</option>
+          <option value="خدمات عامة">خدمات عامة</option>
+          <option value="طلبات ومقترحات">طلبات ومقترحات</option>
+          <option value="مساعدات">مساعدات</option>
+          <option value="أخرى">أخرى</option>
+        </select>
+      </label>
+
+      <label>تفاصيل الطلب
+        <textarea name="details" rows="6" required placeholder="اكتب تفاصيل طلبك"></textarea>
+      </label>
+
+      <button class="submit" id="submitBtn" type="submit">إرسال الطلب</button>
+      <div id="result" class="form-result" hidden></div>
+    </form>
+  </div>
+</main>
+
+<script src="/js/request.js"></script>
+</body>
+</html>

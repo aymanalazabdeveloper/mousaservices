@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>متابعة طلب</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="simple-header"><a href="/" class="back">←</a><h1>متابعة طلب</h1></header>
+
+<main class="form-page">
+  <div class="form-card">
+    <div class="section-label">الاستعلام</div>
+    <h2>تابع حالة طلبك</h2>
+
+    <form id="trackForm">
+      <label>رقم الطلب
+        <input id="requestId" name="id" placeholder="مثال: REQ-2026-000001" required>
+      </label>
+      <button class="submit" type="submit">بحث عن الطلب</button>
+    </form>
+
+    <div id="trackResult" class="track-result" hidden></div>
+  </div>
+</main>
+
+<script>
+const form = document.getElementById("trackForm");
+const input = document.getElementById("requestId");
+const result = document.getElementById("trackResult");
+
+const params = new URLSearchParams(location.search);
+if (params.get("id")) input.value = params.get("id");
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  result.hidden = true;
+
+  try {
+    const id = input.value.trim();
+    const response = await fetch("/api/requests/" + encodeURIComponent(id));
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.message || "لم يتم العثور على الطلب.");
+
+    const date = new Date(data.request.createdAt).toLocaleString("ar-EG");
+
+    result.className = "track-result success";
+    result.innerHTML = `
+      <div><strong>رقم الطلب</strong><span>${data.request.id}</span></div>
+      <div><strong>نوع الطلب</strong><span>${data.request.type}</span></div>
+      <div><strong>الحالة</strong><span class="status">${data.request.status}</span></div>
+      <div><strong>تاريخ التقديم</strong><span>${date}</span></div>
+    `;
+    result.hidden = false;
+  } catch (error) {
+    result.className = "track-result error";
+    result.textContent = error.message;
+    result.hidden = false;
+  }
+});
+</script>
+</body>
+</html>
