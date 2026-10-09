@@ -10,10 +10,15 @@ form.addEventListener("submit", async (event) => {
   result.hidden = true;
 
   try {
+    const formData = new FormData(form);
+    const selectedFiles = document.getElementById("attachments").files;
+    if (selectedFiles.length > 5) throw new Error("الحد الأقصى هو 5 مرفقات لكل طلب.");
+    for (const file of selectedFiles) {
+      if (file.size > 5 * 1024 * 1024) throw new Error(`الملف ${file.name} أكبر من 5 ميجابايت.`);
+    }
     const response = await fetch("/api/requests", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(Object.fromEntries(new FormData(form)))
+      body: formData
     });
 
     const data = await response.json();
@@ -22,15 +27,11 @@ form.addEventListener("submit", async (event) => {
       throw new Error(data.message || "تعذر إرسال الطلب.");
     }
 
-    result.className = "form-result success";
-    result.innerHTML = `
-      <strong>تم تقديم الطلب بنجاح</strong>
-      <span>رقم الطلب: <b>${data.request.id}</b></span>
-      <span>احتفظ برقم الطلب لمتابعة حالته.</span>
-      <a href="/track.html?id=${encodeURIComponent(data.request.id)}">متابعة الطلب</a>
-    `;
-    result.hidden = false;
+    const requestId = data?.request?.id;
+    if (!requestId) throw new Error("تم إرسال الطلب، لكن لم يصل رقم الطلب من الخادم.");
+
     form.reset();
+    window.location.href = `/success.html?id=${encodeURIComponent(requestId)}`;
   } catch (error) {
     result.className = "form-result error";
     result.textContent = error.message;

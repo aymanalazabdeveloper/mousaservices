@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>إنشاء حساب الإدارة - منظومة خدمة المواطنين</title><link rel="stylesheet" href="/css/style.css"></head>
+<body style="background:#f3f6fa;min-height:100vh;display:grid;place-items:center;padding:20px">
+<main style="background:white;padding:28px;border-radius:14px;width:min(100%,460px);box-shadow:0 8px 30px #17324d12">
+<h1 style="font-size:24px;margin-top:0">إنشاء حساب الإدارة</h1>
+<p style="color:#60738f;line-height:1.8">تظهر هذه الصفحة لإنشاء أول حساب فقط عندما يكون ملف <code>users.json</code> فارغًا.</p>
+<form id="setupForm" style="display:grid;gap:14px">
+<label>اسم الموظف<input id="name" required maxlength="100" autocomplete="name" style="display:block;width:100%;padding:12px;margin-top:6px;border:1px solid #dce4ed;border-radius:7px"></label>
+<label>اسم المستخدم<input id="username" required minlength="3" maxlength="40" pattern="[A-Za-z0-9._-]+" autocomplete="username" style="display:block;width:100%;padding:12px;margin-top:6px;border:1px solid #dce4ed;border-radius:7px"></label>
+<label>كلمة المرور (10 أحرف على الأقل)<input id="password" type="password" required minlength="10" autocomplete="new-password" style="display:block;width:100%;padding:12px;margin-top:6px;border:1px solid #dce4ed;border-radius:7px"></label>
+<button class="submit" type="submit">إنشاء الحساب</button><p id="message" role="status" style="margin:0"></p>
+</form><p><a href="/admin.html">العودة إلى تسجيل الدخول</a></p>
+</main>
+<script>
+const form=document.getElementById('setupForm'),message=document.getElementById('message');
+fetch('/api/auth/setup-status').then(r=>r.json()).then(d=>{if(!d.setupRequired){form.hidden=true;message.textContent='تم إنشاء حساب بالفعل. انتقل إلى صفحة تسجيل الدخول.';message.innerHTML+=' <a href="/admin.html">دخول الإدارة</a>';}}).catch(()=>{});
+form.addEventListener('submit',async e=>{e.preventDefault();message.textContent='جارٍ إنشاء الحساب...';message.style.color='#333';try{const r=await fetch('/api/auth/setup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('name').value,username:document.getElementById('username').value,password:document.getElementById('password').value})});const d=await r.json();if(!r.ok)throw new Error(d.message||'تعذر إنشاء الحساب');message.textContent=d.message;message.style.color='#16803f';form.reset();setTimeout(()=>location.href='/admin.html',1200);}catch(err){message.textContent=err.message;message.style.color='#c62828';}});
+</script></body></html>

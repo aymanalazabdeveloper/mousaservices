@@ -1,0 +1,22 @@
+[
+  {
+    "id": "395a4c17-5ddf-472f-a5b2-3b83de3828d0",
+    "username": "Admin",
+    "name": "Admin",
+    "role": "admin",
+    "active": true,
+    "salt": "812819289af3b12da73bc75bf36d5190",
+    "passwordHash": "12c90e2ad8669a2ea93ddd8423c188bfc2802e0cc8f8865bf44fc8fdf6707aeca249d970b70f1640458b3c681dfc9c6cac90fe8679fd9813adfdf97c8cd39fb9",
+    "createdAt": "2026-10-09T18:46:18.103Z"
+  },
+  {
+    "id": "a1478d9f-b6b7-4cf0-ba44-8410e4fa5479",
+    "username": "Ahmed",
+    "name": "Ahmed",
+    "role": "employee",
+    "active": true,
+    "salt": "c81c666a68770239a5518f7140ae745c",
+    "passwordHash": "946faf816b70437e0cf8235a580e8b6a120ed152807cd1ac1179173a0b9bb0b09467ede67e6369799d038726d7387b1bc55bf3491ff81af322bbeffc459cfb76",
+    "createdAt": "2026-10-09T18:50:04.144Z"
+  }
+]

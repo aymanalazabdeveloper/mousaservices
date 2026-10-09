@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b2d52">
+  <title>تم تقديم الطلب بنجاح</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="simple-header">
+  <a href="/" class="back" aria-label="الصفحة الرئيسية">←</a>
+  <h1>تأكيد تقديم الطلب</h1>
+</header>
+
+<main class="form-page">
+  <section class="form-card" style="text-align:center;max-width:620px;margin:35px auto;padding:32px 24px">
+    <div aria-hidden="true" style="width:76px;height:76px;margin:0 auto 20px;border-radius:50%;background:#eefaf2;color:#218447;display:grid;place-items:center;font-size:42px;font-weight:900">✓</div>
+    <h2 style="margin-bottom:18px">تم تقديم الطلب بنجاح</h2>
+    <p style="line-height:1.9;color:#60738f;margin:0 0 12px">رقم الطلب:</p>
+    <p id="requestNumber" dir="ltr" style="font-size:23px;font-weight:900;color:#0b2d52;background:#f3f6fa;border-radius:10px;padding:14px;overflow-wrap:anywhere;margin:0 0 16px">جارٍ تحميل رقم الطلب...</p>
+    <p style="line-height:1.9;margin:0 0 22px">احتفظ برقم الطلب لمتابعة حالته.</p>
+    <a id="trackLink" class="submit" style="display:block;text-decoration:none;box-sizing:border-box" href="/track.html">متابعة الطلب</a>
+    <a href="/" style="display:inline-block;margin-top:20px;color:#0b2d52;font-weight:800">العودة إلى الصفحة الرئيسية</a>
+    <p id="missingId" hidden style="color:#8b2020;line-height:1.8;margin-top:18px">لم يتم العثور على رقم الطلب في الرابط. يمكنك الذهاب إلى صفحة متابعة الطلب وإدخال الرقم يدويًا.</p>
+  </section>
+</main>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const requestId = params.get("id");
+  const number = document.getElementById("requestNumber");
+  const trackLink = document.getElementById("trackLink");
+  const missingId = document.getElementById("missingId");
+
+  if (requestId && /^REQ-[A-Za-z0-9-]+$/.test(requestId)) {
+    number.textContent = requestId;
+    trackLink.href = "/track.html?id=" + encodeURIComponent(requestId);
+  } else {
+    number.textContent = "غير متاح";
+    trackLink.href = "/track.html";
+    missingId.hidden = false;
+  }
+</script>
+</body>
+</html>

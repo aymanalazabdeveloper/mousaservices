@@ -1,24 +1,30 @@
-# Citizen Service - Mobile First
+# منظومة خدمة المواطنين
 
-HTML + CSS + Vanilla JS + Node.js/Express.
+واجهة عربية RTL باستخدام HTML وCSS وVanilla JavaScript وNode.js/Express، مع تخزين الطلبات والحسابات في ملفات JSON.
 
-## Current functionality
-- Mobile-first Arabic RTL UI.
-- New request form.
-- Requests are saved in `data/requests.json`.
-- Automatic request number: `REQ-YYYY-000001`.
-- Default status: `جديد`.
-- Request tracking page.
-- `/health` endpoint.
+## الوظائف الحالية
+- تقديم طلب جديد برقم تلقائي بالشكل `REQ-YYYY-000001`.
+- عرض الطلبات في لوحة الإدارة.
+- تحديث حالة الطلب مع تسجيل الملاحظة والوقت واسم حساب الموظف المسجل دخوله.
+- عرض سجل تحديثات الحالة للمواطن من صفحة متابعة الطلب.
+- حسابات منفصلة للمدير والموظفين محفوظة في `data/users.json`.
+- إنشاء أول حساب مدير مرة واحدة من `/setup.html`.
+- إدارة حسابات الموظفين وتفعيلها أو إيقافها من `/users.html` (للمدير فقط).
+- تخزين كلمات المرور باستخدام `scrypt` مع salt؛ لا تُحفظ كلمات المرور كنص واضح.
 
-## Run
+## التشغيل محليًا
 ```bash
 npm install
 npm start
 ```
+افتح `http://localhost:3000/setup.html` لإنشاء أول حساب مدير. بعد ذلك سجّل الدخول من `/admin.html`، ثم استخدم رابط **إدارة الحسابات** لإضافة حسابات الموظفين.
 
-Open: http://localhost:3000
+## إعداد Railway
+لا تحتاج إلى متغير `ADMIN_PASSWORD` بعد هذا التحديث. بعد النشر افتح `/setup.html` لإنشاء أول حساب مدير، ثم ادخل إلى `/admin.html`.
 
-## Important
-JSON storage is intentionally simple for the first version. For a production multi-user system, move storage to a real database and add authentication, backups, validation, rate limiting, and secure file uploads.
-"# mousaservices" 
+## تنبيهات مهمة
+- ملف الحسابات هو `data/users.json`، والطلبات في `data/requests.json`.
+- لا تضع ملف `users.json` في مجلد `public`؛ يجب أن يظل خارج الملفات المتاحة للتحميل العام.
+- على الاستضافات التي تستخدم قرصًا مؤقتًا، قد تضيع ملفات JSON بعد إعادة النشر أو إعادة التشغيل. للحفاظ على الحسابات والطلبات على Railway، يلزم إعداد Volume دائم وربطه بمجلد `data` أو الانتقال إلى تخزين دائم.
+- جلسات الدخول الحالية محفوظة في ذاكرة الخادم؛ بعد إعادة تشغيل الخدمة سيحتاج المستخدمون إلى تسجيل الدخول مجددًا.
+- لم تتم إضافة رفع المرفقات في هذه المرحلة.

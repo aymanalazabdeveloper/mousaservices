@@ -37,6 +37,10 @@
         <textarea name="details" rows="6" required placeholder="اكتب تفاصيل طلبك"></textarea>
       </label>
 
+      <label>المرفقات (اختياري)
+        <input id="attachments" name="attachments" type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" multiple>
+        <small style="display:block;color:#60738f;margin-top:6px;line-height:1.8">حتى 5 ملفات، بحد أقصى 5 ميجابايت للملف. الأنواع المسموحة: JPG وPNG وPDF.</small>
+      </label>
       <button class="submit" id="submitBtn" type="submit">إرسال الطلب</button>
       <div id="result" class="form-result" hidden></div>
     </form>

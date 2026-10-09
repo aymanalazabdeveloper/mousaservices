@@ -16,7 +16,10 @@
 
     <form id="trackForm">
       <label>رقم الطلب
-        <input id="requestId" name="id" placeholder="مثال: REQ-2026-000001" required>
+        <input id="requestId" name="id" placeholder="مثال: REQ-2026-000001" autocomplete="off" required>
+      </label>
+      <label>رقم الهاتف المسجل على الطلب
+        <input id="requestPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="أدخل رقم الهاتف" required>
       </label>
       <button class="submit" type="submit">بحث عن الطلب</button>
     </form>
@@ -28,30 +31,41 @@
 <script>
 const form = document.getElementById("trackForm");
 const input = document.getElementById("requestId");
+const phoneInput = document.getElementById("requestPhone");
 const result = document.getElementById("trackResult");
-
 const params = new URLSearchParams(location.search);
 if (params.get("id")) input.value = params.get("id");
+function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   result.hidden = true;
-
   try {
     const id = input.value.trim();
-    const response = await fetch("/api/requests/" + encodeURIComponent(id));
+    const phone = phoneInput.value.trim();
+    const response = await fetch("/api/requests/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, phone })
+    });
     const data = await response.json();
-
     if (!response.ok) throw new Error(data.message || "لم يتم العثور على الطلب.");
-
-    const date = new Date(data.request.createdAt).toLocaleString("ar-EG");
-
+    const r = data.request;
+    const date = new Date(r.createdAt).toLocaleString("ar-EG");
+    const history = Array.isArray(r.history) ? r.history.slice().reverse() : [];
     result.className = "track-result success";
     result.innerHTML = `
-      <div><strong>رقم الطلب</strong><span>${data.request.id}</span></div>
-      <div><strong>نوع الطلب</strong><span>${data.request.type}</span></div>
-      <div><strong>الحالة</strong><span class="status">${data.request.status}</span></div>
-      <div><strong>تاريخ التقديم</strong><span>${date}</span></div>
+      <div><strong>رقم الطلب</strong><span>${escapeHtml(r.id)}</span></div>
+      <div><strong>نوع الطلب</strong><span>${escapeHtml(r.type)}</span></div>
+      <div><strong>الحالة الحالية</strong><span class="status">${escapeHtml(r.status)}</span></div>
+      <div><strong>تاريخ التقديم</strong><span>${escapeHtml(date)}</span></div>
+      <h3 style="margin:20px 0 10px">سجل تحديثات الطلب</h3>
+      ${history.length ? `<div style="display:grid;gap:12px">${history.map(h=>`
+        <article style="border-right:3px solid #0b2d52;padding:10px 14px;background:#f6f8fb;border-radius:6px">
+          <strong>${escapeHtml(h.status)}</strong>
+          <div style="margin:5px 0">${escapeHtml(h.note || '')}</div>
+          <small style="color:#60738f">${escapeHtml(new Date(h.timestamp).toLocaleString('ar-EG'))}</small>
+        </article>`).join('')}</div>` : '<p>لا توجد تحديثات مسجلة حتى الآن.</p>'}
     `;
     result.hidden = false;
   } catch (error) {
@@ -60,6 +74,7 @@ form.addEventListener("submit", async (event) => {
     result.hidden = false;
   }
 });
+// Prefill the request number from the success page, but always require the phone number too.
 </script>
 </body>
 </html>

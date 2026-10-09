@@ -3,119 +3,282 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>لوحة الموظف - منظومة خدمة المواطنين</title>
+  <title>لوحة متابعة الطلبات - منظومة خدمة المواطنين</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     :root{--admin-bg:#f2f5f9;--admin-border:#dce4ed;--admin-blue:#0b294b;--admin-muted:#6f829d;--green:#16a34a;--red:#dc2626;--orange:#d97706;--cyan:#0ea5e9}
     body{background:var(--admin-bg)}
-    .admin-shell{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 360px;direction:ltr}
+    .admin-shell{min-height:100vh;display:block;direction:ltr}
     .admin-main{direction:rtl;min-width:0}
-    .admin-side{direction:rtl;background:#fff;border-left:1px solid var(--admin-border);display:flex;flex-direction:column;min-height:100vh;position:sticky;top:0;height:100vh}
-    .admin-brand{padding:26px 26px 22px;border-bottom:1px solid var(--admin-border);display:flex;align-items:center;gap:13px}
-    .admin-brand .mark{width:52px;height:52px;border-radius:12px;background:var(--admin-blue);color:#fff;display:grid;place-items:center;font-size:25px;font-weight:900;flex:none}
-    .admin-brand h1{font-size:18px;margin:0;font-weight:900}.admin-brand p{font-size:13px;color:var(--admin-muted);margin:2px 0 0}
-    .admin-nav{padding:20px 18px;display:grid;gap:7px}.admin-nav a{display:flex;align-items:center;gap:13px;padding:13px 16px;border-radius:8px;font-weight:700;color:#152238}.admin-nav a:hover{background:#f2f5f9}.admin-nav a.active{background:var(--admin-blue);color:#fff}.nav-icon{width:24px;text-align:center;font-size:19px}.admin-user{margin-top:auto;border-top:1px solid var(--admin-border);padding:18px 22px;display:flex;align-items:center;gap:12px}.user-avatar{width:40px;height:40px;border-radius:50%;background:#fff0d3;color:#9b6811;display:grid;place-items:center;font-size:20px}.admin-user strong{display:block;font-size:14px}.admin-user span{display:block;color:var(--admin-muted);font-size:12px}
-    .admin-top{height:84px;background:#fff;border-bottom:1px solid var(--admin-border);padding:0 36px;display:flex;align-items:center;justify-content:space-between}.admin-top .crumb{font-size:13px;color:var(--admin-muted);font-weight:700}.admin-top h2{font-size:17px;margin:2px 0 0;font-weight:900}.bell{font-size:22px;color:#14243a}
+    .admin-top{height:84px;background:#fff;border-bottom:1px solid var(--admin-border);padding:0 36px;display:flex;align-items:center;justify-content:space-between}.admin-top .crumb{font-size:13px;color:var(--admin-muted);font-weight:700}.admin-top h2{font-size:17px;margin:2px 0 0;font-weight:900}.top-actions{display:flex;align-items:center;gap:12px}.users-link{display:inline-flex;align-items:center;gap:8px;padding:10px 15px;border-radius:8px;background:var(--admin-blue);color:#fff;font-weight:800;font-size:14px;text-decoration:none;white-space:nowrap}.users-link:hover{background:#173d68}.bell{font-size:22px;color:#14243a}
     .dashboard{padding:30px 36px 45px;max-width:1500px;margin:auto}.welcome{text-align:right;margin-bottom:28px}.welcome .eyebrow2{font-size:13px;color:var(--admin-muted);font-weight:700}.welcome h1{font-size:34px;margin:4px 0 0;font-weight:900}.welcome p{margin:2px 0;color:var(--admin-muted);font-size:15px}
-    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:28px}.stat{background:#fff;border:1px solid var(--admin-border);border-radius:8px;min-height:115px;padding:20px;display:flex;align-items:flex-start;justify-content:space-between;box-shadow:0 2px 6px #102f5308}.stat h3{margin:0 0 8px;font-size:15px;color:#33445b}.stat strong{font-size:31px;line-height:1;font-weight:900}.stat-icon{width:46px;height:46px;border-radius:7px;display:grid;place-items:center;font-size:23px}.stat:nth-child(1) .stat-icon{background:#e7e9ed;color:#20344e}.stat:nth-child(2) .stat-icon{background:#dff3ff;color:#0284c7}.stat:nth-child(3) .stat-icon{background:#fff0cf;color:#c08419}.stat:nth-child(4) .stat-icon{background:#ffe5e1;color:#dc2626}.stat:nth-child(5) .stat-icon{background:#dcf8e3;color:#159447}
-    .content-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,.8fr);gap:22px;direction:ltr}.panel{background:#fff;border:1px solid var(--admin-border);border-radius:8px;overflow:hidden;direction:rtl}.panel-head{padding:20px 22px;display:flex;align-items:center;justify-content:space-between}.panel-head h2{font-size:24px;margin:0;font-weight:900}.panel-head a{font-size:14px;color:#263c57}.table-wrap{overflow-x:auto}.requests-table{width:100%;border-collapse:collapse;min-width:800px}.requests-table th{background:#f4f6f9;color:#60738f;font-size:13px;padding:14px 12px;text-align:right;font-weight:800}.requests-table td{padding:15px 12px;border-top:1px solid var(--admin-border);font-size:13px;vertical-align:middle}.requests-table td:first-child{font-weight:900;color:#0e3157}.citizen{font-weight:900}.phone{color:#687d98}.type{font-size:13px}.status{display:inline-flex;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}.status.new{background:#dff3ff;color:#0876ad}.status.progress{background:#fff0cf;color:#a86d09}.status.done{background:#dcf8e3;color:#16803f}.status.wait{background:#ffeccf;color:#a86d09}.status.need{background:#ffe1de;color:#c62828}.open-btn{border:1px solid var(--admin-border);background:#fff;border-radius:7px;padding:7px 11px;font:inherit;color:#213750;cursor:pointer}.open-btn:hover{background:#f3f6f9}
-    .visits{padding:0 20px 20px}.visit{border:1px solid var(--admin-border);background:#fff;border-radius:7px;padding:15px 16px;margin-bottom:12px}.visit .time{font-weight:900;font-size:16px}.visit .person{font-weight:900;margin-top:5px}.visit .meta{font-size:12px;color:var(--admin-muted);margin-top:2px}.visit .tag{float:left;margin-top:-27px;background:#fff0cf;color:#a86d09;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:800}.visit:first-child .tag{background:#dff3ff;color:#0876ad}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:28px}.stat{background:#fff;border:1px solid var(--admin-border);border-radius:8px;min-height:115px;padding:20px;display:flex;align-items:flex-start;justify-content:space-between;box-shadow:0 2px 6px #102f5308}.stat h3{margin:0 0 8px;font-size:15px;color:#33445b}.stat strong{font-size:31px;line-height:1;font-weight:900}.stat-icon{width:46px;height:46px;border-radius:7px;display:grid;place-items:center;font-size:23px}.stat:nth-child(1) .stat-icon{background:#e7e9ed;color:#20344e}.stat:nth-child(2) .stat-icon{background:#dff3ff;color:#0284c7}.stat:nth-child(3) .stat-icon{background:#fff0cf;color:#c08419}.stat:nth-child(4) .stat-icon{background:#ffe5e1;color:#dc2626}.stat:nth-child(5) .stat-icon{background:#dcf8e3;color:#159447}
+    .content-grid{display:block;direction:ltr}.panel{background:#fff;border:1px solid var(--admin-border);border-radius:8px;overflow:hidden;direction:rtl}.panel-head{padding:20px 22px;display:flex;align-items:center;justify-content:space-between}.panel-head h2{font-size:24px;margin:0;font-weight:900}.panel-head a{font-size:14px;color:#263c57}.table-wrap{overflow-x:auto}.requests-table{width:100%;border-collapse:collapse;min-width:800px}.requests-table th{background:#f4f6f9;color:#60738f;font-size:13px;padding:14px 12px;text-align:right;font-weight:800}.requests-table td{padding:15px 12px;border-top:1px solid var(--admin-border);font-size:13px;vertical-align:middle}.requests-table td:first-child{font-weight:900;color:#0e3157}.citizen{font-weight:900}.phone{color:#687d98}.type{font-size:13px}.status{display:inline-flex;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}.status.new{background:#dff3ff;color:#0876ad}.status.progress{background:#fff0cf;color:#a86d09}.status.done{background:#dcf8e3;color:#16803f}.status.wait{background:#ffeccf;color:#a86d09}.status.need{background:#ffe1de;color:#c62828}.open-btn{border:1px solid var(--admin-border);background:#fff;border-radius:7px;padding:7px 11px;font:inherit;color:#213750;cursor:pointer}.open-btn:hover{background:#f3f6f9}
+    
+    .filters{padding:18px 22px;border-top:1px solid var(--admin-border);border-bottom:1px solid var(--admin-border);display:grid;gap:14px;background:#fff}
+    .filter-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .filter-input{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--admin-border);border-radius:8px;font:inherit;background:#fff;color:#152238}
+    .status-filters{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+    .status-filter{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;white-space:nowrap}
+    .status-filter input{width:16px;height:16px;accent-color:var(--admin-blue)}
+    .filter-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .filter-button{border:1px solid var(--admin-border);border-radius:8px;padding:9px 14px;background:#fff;color:#213750;font:inherit;font-weight:700;cursor:pointer}
+    .filter-button.primary{background:var(--admin-blue);color:#fff;border-color:var(--admin-blue)}
+    .pagination{display:flex;justify-content:center;align-items:center;gap:10px;padding:16px;flex-wrap:wrap}
+    .pagination button:disabled{opacity:.45;cursor:not-allowed}
+    .page-info{font-size:13px;color:var(--admin-muted);font-weight:700}
     .empty{padding:30px;text-align:center;color:var(--admin-muted)}
-    @media(max-width:1250px){.admin-shell{grid-template-columns:minmax(0,1fr) 300px}.stats{grid-template-columns:repeat(3,1fr)}.content-grid{grid-template-columns:1fr}.visits{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.visit{margin:0}}
-    @media(max-width:850px){.admin-shell{display:flex;flex-direction:column}.admin-side{order:-1;min-height:auto;height:auto;position:static;border-left:0;border-bottom:1px solid var(--admin-border)}.admin-brand{padding:14px 16px}.admin-brand .mark{width:44px;height:44px}.admin-nav{display:flex;overflow-x:auto;padding:8px 12px}.admin-nav a{white-space:nowrap;padding:10px 12px}.admin-nav a:not(.active){background:#f7f9fb}.admin-user{display:none}.admin-top{height:62px;padding:0 16px}.dashboard{padding:22px 16px 35px}.welcome h1{font-size:28px}.stats{grid-template-columns:1fr 1fr}.visits{grid-template-columns:1fr}}
-    @media(max-width:520px){.stats{grid-template-columns:1fr}.stat{min-height:95px}.welcome h1{font-size:25px}.panel-head h2{font-size:20px}.requests-table{min-width:760px}.admin-nav{gap:3px}.admin-nav a{font-size:12px}}
+    @media(max-width:1250px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:850px){.admin-top{height:auto;min-height:62px;padding:12px 16px;gap:12px}.users-link{padding:9px 11px;font-size:12px}.dashboard{padding:22px 16px 35px}.welcome h1{font-size:28px}.stats{grid-template-columns:1fr 1fr}}
+    @media(max-width:520px){.stats{grid-template-columns:1fr}.stat{min-height:95px}.welcome h1{font-size:25px}.panel-head h2{font-size:20px}.requests-table{min-width:760px}.admin-top{align-items:flex-start}.top-actions{gap:6px}.users-link{font-size:11px;padding:8px}.bell{font-size:18px}.filter-fields{grid-template-columns:1fr}.filters{padding:14px}.status-filters{gap:9px 12px}}
   </style>
 </head>
 <body>
 <div class="admin-shell">
   <main class="admin-main">
     <header class="admin-top">
-      <div><div class="crumb">الرئيسية / صباح الخير، سارة</div><h2>لوحة الموظف</h2></div>
-      <div class="bell">♧</div>
+      <div><div class="crumb">الرئيسية / لوحة متابعة الطلبات</div><h2>لوحة متابعة الطلبات</h2></div>
+      <div class="top-actions"><a class="users-link" href="/users.html"><span aria-hidden="true">⚙</span> إدارة المستخدمين</a><div class="bell">♧</div></div>
     </header>
 
     <section class="dashboard">
       <div class="welcome">
-        <div class="eyebrow2">الرئيسية / صباح الخير، سارة</div>
-        <h1>صباح الخير، سارة</h1>
-        <p>إليك ملخص العمل في مقر خدمة المواطنين اليوم</p>
+        <div class="eyebrow2">لوحة التحكم</div>
+        <h1 id="welcomeTitle">مرحبًا، موظف الإدارة</h1>
+        <p>إليك ملخص الطلبات الواردة ومتابعتها</p>
       </div>
 
       <section class="stats">
         <article class="stat"><div><h3>طلبات اليوم</h3><strong id="countToday">٠</strong></div><div class="stat-icon">▤</div></article>
-        <article class="stat"><div><h3>طلبات جديدة</h3><strong id="countNew">٠</strong></div><div class="stat-icon">＋</div></article>
+        <article class="stat"><div><h3>جديد</h3><strong id="countNew">٠</strong></div><div class="stat-icon">＋</div></article>
+        <article class="stat"><div><h3>قيد المراجعة</h3><strong id="countReview">٠</strong></div><div class="stat-icon">⌕</div></article>
+        <article class="stat"><div><h3>يحتاج استكمال بيانات</h3><strong id="countNeed">٠</strong></div><div class="stat-icon">♙</div></article>
         <article class="stat"><div><h3>جاري المتابعة</h3><strong id="countProgress">٠</strong></div><div class="stat-icon">⌁</div></article>
-        <article class="stat"><div><h3>تحتاج حضور</h3><strong id="countNeed">٠</strong></div><div class="stat-icon">♙</div></article>
-        <article class="stat"><div><h3>تم الانتهاء</h3><strong id="countDone">٠</strong></div><div class="stat-icon">✓</div></article>
+        <article class="stat"><div><h3>تم الحل</h3><strong id="countDone">٠</strong></div><div class="stat-icon">✓</div></article>
+        <article class="stat"><div><h3>مرفوض</h3><strong id="countRejected">٠</strong></div><div class="stat-icon">×</div></article>
       </section>
 
       <div class="content-grid">
-        <section class="panel">
-          <div class="panel-head"><h2>أحدث الطلبات</h2><a href="/track.html">عرض الكل ←</a></div>
+        <section class="panel" id="requests">
+          <div class="panel-head"><h2>الطلبات</h2><span id="filteredCount" class="page-info">عدد الطلبات: ٠</span></div>
+          <section class="filters" aria-label="تصفية الطلبات">
+            <div class="filter-fields">
+              <input id="filterRequestId" class="filter-input" type="search" placeholder="بحث برقم الطلب مثل REQ-2026-000001" aria-label="بحث برقم الطلب">
+              <input id="filterPhone" class="filter-input" type="search" inputmode="tel" placeholder="بحث برقم الهاتف" aria-label="بحث برقم الهاتف">
+              <input id="filterCitizenName" class="filter-input" type="search" placeholder="بحث باسم المواطن" aria-label="بحث باسم المواطن">
+              <input id="filterServiceType" class="filter-input" type="search" placeholder="بحث بنوع الخدمة" aria-label="بحث بنوع الخدمة">
+            </div>
+            <div><strong style="display:block;margin-bottom:10px;font-size:14px">تصفية حسب الحالة</strong>
+              <div class="status-filters">
+                <label class="status-filter"><input type="checkbox" class="status-checkbox" value="جديد"> جديد</label>
+                <label class="status-filter"><input type="checkbox" class="status-checkbox" value="قيد المراجعة"> قيد المراجعة</label>
+                <label class="status-filter"><input type="checkbox" class="status-checkbox" value="يحتاج استكمال بيانات"> يحتاج استكمال بيانات</label>
+                <label class="status-filter"><input type="checkbox" class="status-checkbox" value="جاري المتابعة"> جاري المتابعة</label>
+                <label class="status-filter"><input type="checkbox" class="status-checkbox" value="تم الحل"> تم الحل</label>
+                <label class="status-filter"><input type="checkbox" class="status-checkbox" value="مرفوض"> مرفوض</label>
+              </div>
+            </div>
+            <div class="filter-actions"><button type="button" id="clearFilters" class="filter-button">مسح كل الفلاتر</button><label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700">عدد الطلبات بالصفحة <select id="pageSize" class="filter-input" style="width:auto;padding:8px"><option value="10">10</option><option value="25">25</option><option value="50">50</option></select></label></div>
+          </section>
           <div class="table-wrap">
             <table class="requests-table">
               <thead><tr><th>رقم الطلب</th><th>المواطن</th><th>الهاتف</th><th>النوع</th><th>التاريخ</th><th>الحالة</th><th></th></tr></thead>
               <tbody id="requestsBody"><tr><td colspan="7" class="empty">جاري تحميل الطلبات...</td></tr></tbody>
             </table>
           </div>
+          <div class="pagination"><button type="button" id="prevPage" class="filter-button">السابق</button><span id="pageInfo" class="page-info">صفحة ١ من ١</span><button type="button" id="nextPage" class="filter-button">التالي</button></div>
         </section>
 
-        <section class="panel">
-          <div class="panel-head"><h2>زيارات اليوم</h2></div>
-          <div class="visits">
-            <article class="visit"><span class="tag">حاضر</span><div class="time">١٠:٠٠ صباحًا</div><div class="person">أحمد محمد حسن</div><div class="meta">علاج · ط-١٤٨</div></article>
-            <article class="visit"><span class="tag">منتظر</span><div class="time">١٠:٣٠ صباحًا</div><div class="person">محمود علي إبراهيم</div><div class="meta">شكوى · ط-١٤٩</div></article>
-            <article class="visit"><span class="tag">منتظر</span><div class="time">١١:٠٠ صباحًا</div><div class="person">محمد عبد الرحمن</div><div class="meta">خدمة حكومية · ط-١٥٠</div></article>
-            <article class="visit"><span class="tag">منتظر</span><div class="time">١١:٣٠ صباحًا</div><div class="person">هيئة أحمد علي</div><div class="meta">خدمة حكومية · ط-١٥١</div></article>
-          </div>
-        </section>
       </div>
     </section>
   </main>
 
-  <aside class="admin-side">
-    <div class="admin-brand"><div class="mark">▥</div><div><h1>منظومة خدمة المواطنين</h1><p>مكتب عضو مجلس الشيوخ</p></div></div>
-    <nav class="admin-nav">
-      <a class="active" href="/admin.html"><span class="nav-icon">⌘</span>الرئيسية</a>
-      <a href="#requests"><span class="nav-icon">▣</span>الطلبات</a>
-      <a href="/request.html"><span class="nav-icon">＋</span>إضافة طلب</a>
-      <a href="#visits"><span class="nav-icon">▦</span>زيارات اليوم</a>
-      <a href="#citizens"><span class="nav-icon">♙</span>المواطنون</a>
-    </nav>
-    <div class="admin-user"><div class="user-avatar">♙</div><div><strong>سارة محمود</strong><span>موظف خدمة المواطنين</span></div></div>
-  </aside>
+</div>
+
+
+<div id="adminLogin" style="position:fixed;inset:0;background:#10243bcc;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px">
+  <form id="adminLoginForm" style="background:#fff;padding:28px;border-radius:12px;width:min(100%,420px);display:grid;gap:14px;direction:rtl">
+    <h2 style="margin:0">دخول الإدارة</h2>
+    <p style="margin:0;color:#60738f">سجّل الدخول بحسابك لعرض الطلبات وتحديثها.</p>
+    <label>اسم المستخدم <input id="loginUsername" type="text" required autocomplete="username" style="width:100%;padding:12px;border:1px solid #dce4ed;border-radius:7px;margin-top:6px"></label>
+    <label>كلمة المرور <input id="adminPassword" type="password" required autocomplete="current-password" style="width:100%;padding:12px;border:1px solid #dce4ed;border-radius:7px;margin-top:6px"></label>
+    <button class="submit" type="submit">دخول</button>
+    <p id="loginError" style="color:#c62828;margin:0" hidden></p>
+  </form>
+</div>
+<div id="requestModal" style="display:none;position:fixed;inset:0;background:#10243b99;z-index:900;align-items:center;justify-content:center;padding:16px">
+  <section style="background:#fff;border-radius:12px;width:min(100%,700px);max-height:90vh;overflow:auto;padding:24px;direction:rtl">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2 id="modalTitle" style="margin:0">تفاصيل الطلب</h2><button type="button" class="open-btn" onclick="closeRequestModal()">إغلاق ✕</button></div>
+    <div id="modalDetails" style="line-height:2;margin:18px 0"></div>
+    <form id="statusForm" style="display:grid;gap:14px;border-top:1px solid #dce4ed;padding-top:18px">
+      <label>الحالة الجديدة
+        <select id="newStatus" required style="display:block;width:100%;padding:12px;margin-top:6px;border:1px solid #dce4ed;border-radius:7px">
+          <option>جديد</option><option>قيد المراجعة</option><option>يحتاج استكمال بيانات</option><option>جاري المتابعة</option><option>تم الحل</option><option>مرفوض</option>
+        </select>
+      </label>
+      <label>ملاحظة التحديث (ستظهر للمواطن)
+        <textarea id="statusNote" rows="3" required placeholder="اكتب سبب تغيير الحالة أو الخطوة التالية" style="display:block;width:100%;padding:12px;margin-top:6px;border:1px solid #dce4ed;border-radius:7px"></textarea>
+      </label>
+      <button class="submit" type="submit">حفظ التحديث</button>
+      <p id="statusMessage" style="margin:0" hidden></p>
+    </form>
+  </section>
 </div>
 
 <script>
 const arabic = n => Number(n || 0).toLocaleString('ar-EG');
+let adminToken = sessionStorage.getItem('mousaAdminToken') || '';
+let currentUser = JSON.parse(sessionStorage.getItem('mousaAdminUser') || 'null');
+let employeeName = currentUser?.name || currentUser?.username || 'موظف الإدارة';
+let currentRequestId = '';
+let allRequests = [];
+let currentPage = 1;
+const DEFAULT_PAGE_SIZE = 10;
+const loginLayer = document.getElementById('adminLogin');
+const loginError = document.getElementById('loginError');
+function updateUserDisplay(){
+  employeeName = currentUser?.name || currentUser?.username || 'موظف الإدارة';
+  const role = currentUser?.role === 'admin' || currentUser?.role === 'administrator' ? 'مدير النظام' : 'موظف خدمة المواطنين';
+  document.getElementById('welcomeTitle').textContent = 'مرحبًا، ' + employeeName;
+  const sidebarName = document.getElementById('sidebarUserName');
+  const sidebarRole = document.getElementById('sidebarUserRole');
+  if (sidebarName) sidebarName.textContent = employeeName;
+  if (sidebarRole) sidebarRole.textContent = role;
+}
+updateUserDisplay();
 function statusClass(status){
   if(status === 'جديد') return 'new';
-  if(status === 'تم الحل' || status === 'تمت المعالجة' || status === 'مغلق') return 'done';
-  if(status === 'يحتاج حضور المواطن') return 'need';
+  if(status === 'تم الحل') return 'done';
+  if(status === 'يحتاج استكمال بيانات' || status === 'مرفوض') return 'need';
+  if(status === 'قيد المراجعة') return 'wait';
   return 'progress';
 }
-function render(requests){
+function escapeHtml(v){return String(v??'').replace(/[&<>\'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+async function adminFetch(url, options={}) {
+  const headers = {...(options.headers || {}), 'x-admin-token': adminToken};
+  if (options.body) headers['Content-Type'] = 'application/json';
+  const response = await fetch(url, {...options, headers});
+  const data = await response.json().catch(()=>({success:false,message:'استجابة غير مفهومة من الخادم.'}));
+  if (!response.ok) throw new Error(data.message || 'تعذر تنفيذ العملية.');
+  return data;
+}
+async function loadRequests(){ const data = await adminFetch('/api/requests'); allRequests = data.requests || []; renderStats(allRequests); currentPage = 1; renderRequestTable(); }
+function renderStats(requests){
   const today = new Date().toDateString();
-  const isToday = r => new Date(r.createdAt).toDateString() === today;
-  const todayCount = requests.filter(isToday).length;
+  const todayCount = requests.filter(r => new Date(r.createdAt).toDateString() === today).length;
   const newer = requests.filter(r => r.status === 'جديد').length;
-  const progress = requests.filter(r => ['قيد المراجعة','جاري المتابعة','يحتاج مراجعة المدير'].includes(r.status)).length;
-  const need = requests.filter(r => r.status === 'يحتاج حضور المواطن').length;
-  const done = requests.filter(r => ['تم الحل','تمت المعالجة','مغلق'].includes(r.status)).length;
+  const review = requests.filter(r => r.status === 'قيد المراجعة').length;
+  const progress = requests.filter(r => r.status === 'جاري المتابعة').length;
+  const need = requests.filter(r => r.status === 'يحتاج استكمال بيانات').length;
+  const done = requests.filter(r => r.status === 'تم الحل').length;
+  const rejected = requests.filter(r => r.status === 'مرفوض').length;
   document.getElementById('countToday').textContent = arabic(todayCount);
   document.getElementById('countNew').textContent = arabic(newer);
+  document.getElementById('countReview').textContent = arabic(review);
   document.getElementById('countProgress').textContent = arabic(progress);
   document.getElementById('countNeed').textContent = arabic(need);
   document.getElementById('countDone').textContent = arabic(done);
+  document.getElementById('countRejected').textContent = arabic(rejected);
+}
+function getFilteredRequests(){
+  const idQuery = document.getElementById('filterRequestId').value.trim().toLowerCase();
+  const phoneQuery = document.getElementById('filterPhone').value.replace(/\D/g, '');
+  const nameQuery = document.getElementById('filterCitizenName').value.trim().toLocaleLowerCase('ar');
+  const serviceQuery = document.getElementById('filterServiceType').value.trim().toLocaleLowerCase('ar');
+  const selectedStatuses = [...document.querySelectorAll('.status-checkbox:checked')].map(input => input.value);
+  return allRequests.filter(r => {
+    const idMatches = !idQuery || String(r.id || '').toLowerCase().includes(idQuery);
+    const phone = String(r.phone || '').replace(/\D/g, '');
+    const phoneMatches = !phoneQuery || phone.includes(phoneQuery);
+    const name = String(r.name || '').toLocaleLowerCase('ar');
+    const nameMatches = !nameQuery || name.includes(nameQuery);
+    const service = String(r.type || '').toLocaleLowerCase('ar');
+    const serviceMatches = !serviceQuery || service.includes(serviceQuery);
+    const statusMatches = selectedStatuses.length === 0 || selectedStatuses.includes(r.status);
+    return idMatches && phoneMatches && nameMatches && serviceMatches && statusMatches;
+  }).slice().sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+}
+function renderRequestTable(){
   const body = document.getElementById('requestsBody');
-  if(!requests.length){ body.innerHTML='<tr><td colspan="7" class="empty">لا توجد طلبات حتى الآن</td></tr>'; return; }
-  body.innerHTML = requests.slice().reverse().slice(0,8).map(r=>{
+  const filtered = getFilteredRequests();
+  const pageSize = Number(document.getElementById('pageSize').value) || DEFAULT_PAGE_SIZE;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  currentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const start = (currentPage - 1) * pageSize;
+  const pageItems = filtered.slice(start, start + pageSize);
+  document.getElementById('filteredCount').textContent = `عدد النتائج: ${arabic(filtered.length)}`;
+  document.getElementById('pageInfo').textContent = `صفحة ${arabic(currentPage)} من ${arabic(totalPages)}`;
+  document.getElementById('prevPage').disabled = currentPage <= 1;
+  document.getElementById('nextPage').disabled = currentPage >= totalPages;
+  if(!pageItems.length){ body.innerHTML=`<tr><td colspan="7" class="empty">${allRequests.length ? 'لا توجد طلبات مطابقة للفلاتر' : 'لا توجد طلبات حتى الآن'}</td></tr>`; return; }
+  body.innerHTML = pageItems.map(r=>{
     const d = new Date(r.createdAt);
-    return `<tr><td>${r.id}</td><td class="citizen">${escapeHtml(r.name)}</td><td class="phone">${escapeHtml(r.phone)}</td><td class="type">${escapeHtml(r.type)}</td><td>${d.toLocaleDateString('ar-EG')}</td><td><span class="status ${statusClass(r.status)}">${escapeHtml(r.status)}</span></td><td><button class="open-btn" onclick="location.href='/track.html?id=${encodeURIComponent(r.id)}'">فتح</button></td></tr>`;
+    return `<tr><td>${escapeHtml(r.id)}</td><td class="citizen">${escapeHtml(r.name)}</td><td class="phone">${escapeHtml(r.phone)}</td><td class="type">${escapeHtml(r.type)}</td><td>${d.toLocaleDateString('ar-EG')}</td><td><span class="status ${statusClass(r.status)}">${escapeHtml(r.status)}</span></td><td><button class="open-btn" onclick="openRequest('${encodeURIComponent(r.id)}')">مراجعة</button></td></tr>`;
   }).join('');
 }
-function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-fetch('/api/requests').then(r=>r.json()).then(d=>render(d.requests||[])).catch(()=>render([]));
+async function openRequest(encodedId){
+  try {
+    const id = decodeURIComponent(encodedId);
+    const data = await adminFetch('/api/admin/requests/' + encodeURIComponent(id));
+    currentRequestId = id;
+    const r = data.request;
+    document.getElementById('modalTitle').textContent = 'مراجعة الطلب ' + r.id;
+    const attachments = Array.isArray(r.attachments) ? r.attachments : [];
+    document.getElementById('modalDetails').innerHTML = `<p><b>المواطن:</b> ${escapeHtml(r.name)}</p><p><b>الهاتف:</b> ${escapeHtml(r.phone)}</p><p><b>نوع الطلب:</b> ${escapeHtml(r.type)}</p><p><b>التفاصيل:</b> ${escapeHtml(r.details)}</p><p><b>الحالة الحالية:</b> ${escapeHtml(r.status)}</p><p><b>تاريخ التقديم:</b> ${new Date(r.createdAt).toLocaleString('ar-EG')}</p><section style="margin-top:16px;padding-top:12px;border-top:1px solid #dce4ed"><h3 style="margin:0 0 8px">المرفقات (${attachments.length})</h3>${attachments.length ? `<div style="display:grid;gap:8px">${attachments.map(a=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#f6f8fb;padding:10px;border-radius:8px"><span>${escapeHtml(a.originalName)} <small>(${Math.ceil((a.size||0)/1024)} KB)</small></span><button type="button" class="open-btn" onclick="downloadAttachment('${encodeURIComponent(r.id)}','${encodeURIComponent(a.id)}','${encodeURIComponent(a.originalName)}')">تنزيل</button></div>`).join('')}</div>` : '<p>لا توجد مرفقات.</p>'}</section>`;
+    document.getElementById('newStatus').value = r.status;
+    document.getElementById('statusNote').value = '';
+    document.getElementById('statusMessage').hidden = true;
+    document.getElementById('requestModal').style.display = 'flex';
+  } catch(e) { alert(e.message); }
+}
+async function downloadAttachment(encodedRequestId, encodedAttachmentId, encodedName){
+  try {
+    const response = await fetch('/api/admin/requests/' + encodeURIComponent(decodeURIComponent(encodedRequestId)) + '/attachments/' + encodeURIComponent(decodeURIComponent(encodedAttachmentId)), {headers:{'x-admin-token':adminToken}});
+    if(!response.ok){const data=await response.json().catch(()=>({}));throw new Error(data.message||'تعذر تنزيل المرفق.');}
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a'); link.href=url; link.download=decodeURIComponent(encodedName)||'attachment'; document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  } catch(e){alert(e.message);}
+}
+function closeRequestModal(){document.getElementById('requestModal').style.display='none';}
+document.getElementById('filterRequestId').addEventListener('input', () => { currentPage = 1; renderRequestTable(); });
+document.getElementById('filterPhone').addEventListener('input', () => { currentPage = 1; renderRequestTable(); });
+document.getElementById('filterCitizenName').addEventListener('input', () => { currentPage = 1; renderRequestTable(); });
+document.getElementById('filterServiceType').addEventListener('input', () => { currentPage = 1; renderRequestTable(); });
+document.querySelectorAll('.status-checkbox').forEach(input => input.addEventListener('change', () => { currentPage = 1; renderRequestTable(); }));
+document.getElementById('clearFilters').addEventListener('click', () => {
+  document.getElementById('filterRequestId').value = '';
+  document.getElementById('filterPhone').value = '';
+  document.getElementById('filterCitizenName').value = '';
+  document.getElementById('filterServiceType').value = '';
+  document.querySelectorAll('.status-checkbox').forEach(input => input.checked = false);
+  currentPage = 1; renderRequestTable();
+});
+document.getElementById('pageSize').addEventListener('change', () => { currentPage = 1; renderRequestTable(); });
+document.getElementById('prevPage').addEventListener('click', () => { if(currentPage > 1){ currentPage--; renderRequestTable(); } });
+document.getElementById('nextPage').addEventListener('click', () => { currentPage++; renderRequestTable(); });
+document.getElementById('adminLoginForm').addEventListener('submit', async event=>{
+  event.preventDefault(); loginError.hidden = true;
+  try {
+    const response = await fetch('/api/auth/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:document.getElementById('loginUsername').value.trim(),password:document.getElementById('adminPassword').value})});
+    const data = await response.json();
+    if(!response.ok) throw new Error(data.message || 'تعذر تسجيل الدخول.');
+    adminToken = data.token; currentUser = data.user; updateUserDisplay();
+    sessionStorage.setItem('mousaAdminToken',adminToken); sessionStorage.setItem('mousaAdminUser',JSON.stringify(currentUser));
+    await loadRequests(); loginLayer.style.display = 'none';
+  } catch(e) { loginError.textContent = e.message; loginError.hidden = false; }
+});
+document.getElementById('statusForm').addEventListener('submit', async event=>{
+  event.preventDefault(); const msg = document.getElementById('statusMessage'); msg.hidden = true;
+  try {
+    await adminFetch('/api/requests/' + encodeURIComponent(currentRequestId) + '/status', {method:'PATCH',body:JSON.stringify({status:document.getElementById('newStatus').value,note:document.getElementById('statusNote').value})});
+    msg.textContent = 'تم حفظ التحديث بنجاح.'; msg.style.color = '#16803f'; msg.hidden = false;
+    document.getElementById('statusNote').value = ''; await loadRequests(); setTimeout(closeRequestModal, 700);
+  } catch(e) { msg.textContent = e.message; msg.style.color = '#c62828'; msg.hidden = false; }
+});
+if(adminToken){ updateUserDisplay(); loadRequests().then(()=>{loginLayer.style.display='none';}).catch(()=>{sessionStorage.removeItem('mousaAdminToken');sessionStorage.removeItem('mousaAdminUser');adminToken='';loginLayer.style.display='flex';}); }
+fetch('/api/auth/setup-status').then(r=>r.json()).then(d=>{if(d.setupRequired) {const p=document.createElement('p');p.style.cssText='margin:0;text-align:center';p.innerHTML='<a href="/setup.html">إنشاء حساب الإدارة لأول مرة</a>';document.getElementById('adminLoginForm').appendChild(p);}}).catch(()=>{});
 </script>
 </body>
 </html>
