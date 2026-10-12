@@ -1,0 +1,15 @@
+[
+  {
+    "employeeId": "395a4c17-5ddf-472f-a5b2-3b83de3828d0",
+    "employeeName": "Admin",
+    "subscription": {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/fuoQYsZSvbs:APA91bFT4WyLAuZxHFzGPdzgxm9evNJyYIoCCI-i4ENUAFEdjsgGH3qIxiWaON5kPR1Qemo_uBzn0FuHK_nJG_ChZLXHDUPAdtGzeT4HY1Lxo-T4m0_00THp7NOKUv_lFuu80NPPZ2tz",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BI8wUy3VpCgZboPz1NSTCzCY7gR03q8J7xXBQicVAJfWUUc6Qz_OCcUhBxwLppciLFVONuLx17MYFUAgzrBxxNQ",
+        "auth": "bL4-XiPTxE85nd4Aw_9sXA"
+      }
+    },
+    "savedAt": "2026-10-12T16:49:48.668Z"
+  }
+]
