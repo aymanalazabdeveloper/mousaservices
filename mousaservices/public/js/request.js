@@ -8,6 +8,8 @@ form.addEventListener("submit", async (event) => {
   button.disabled = true;
   button.textContent = "جاري إرسال الطلب...";
   result.hidden = true;
+  const submissionKey = sessionStorage.getItem("mousaRequestSubmissionKey") || crypto.randomUUID();
+  sessionStorage.setItem("mousaRequestSubmissionKey", submissionKey);
 
   try {
     const formData = new FormData(form);
@@ -18,21 +20,26 @@ form.addEventListener("submit", async (event) => {
     }
     const response = await fetch("/api/requests", {
       method: "POST",
+      headers: { "Idempotency-Key": submissionKey },
       body: formData
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "تعذر إرسال الطلب.");
+      const error = new Error(data.message || "تعذر إرسال الطلب.");
+      error.responseReceived = true;
+      throw error;
     }
 
     const requestId = data?.request?.id;
     if (!requestId) throw new Error("تم إرسال الطلب، لكن لم يصل رقم الطلب من الخادم.");
 
     form.reset();
+    sessionStorage.removeItem("mousaRequestSubmissionKey");
     window.location.href = `/success.html?id=${encodeURIComponent(requestId)}`;
   } catch (error) {
+    if (error.responseReceived) sessionStorage.removeItem("mousaRequestSubmissionKey");
     result.className = "form-result error";
     result.textContent = error.message;
     result.hidden = false;

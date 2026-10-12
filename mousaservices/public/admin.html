@@ -46,6 +46,12 @@
         <div class="eyebrow2">لوحة التحكم</div>
         <h1 id="welcomeTitle">مرحبًا، موظف الإدارة</h1>
         <p>إليك ملخص الطلبات الواردة ومتابعتها</p>
+        <section aria-label="إشعارات الطلبات" style="margin-top:16px;padding:14px 16px;background:#f5f8fc;border:1px solid #dce4ed;border-radius:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button type="button" id="pushToggle" class="submit" style="width:auto;padding:10px 16px">تفعيل الإشعارات</button>
+          <button type="button" id="pushTest" class="open-btn" hidden>إرسال إشعار تجريبي</button>
+          <span id="pushStatus" role="status" aria-live="polite">حالة الإشعارات: غير مفعّلة</span>
+          <small id="pushHelp" style="flex-basis:100%;color:#60738f">فعّلها على كل جهاز ترغب في استقبال تنبيهات الطلبات عليه.</small>
+        </section>
       </div>
 
       <section class="stats">
@@ -163,6 +169,66 @@ async function adminFetch(url, options={}) {
   return data;
 }
 async function loadRequests(){ const data = await adminFetch('/api/requests'); allRequests = data.requests || []; renderStats(allRequests); currentPage = 1; renderRequestTable(); }
+const pushToggle = document.getElementById('pushToggle');
+const pushStatus = document.getElementById('pushStatus');
+const pushHelp = document.getElementById('pushHelp');
+const pushTest = document.getElementById('pushTest');
+function setPushUi(enabled, message){
+  pushStatus.textContent = `حالة الإشعارات: ${enabled ? 'مفعّلة على هذا الجهاز' : 'غير مفعّلة'}`;
+  pushToggle.textContent = enabled ? 'إيقاف الإشعارات على هذا الجهاز' : 'تفعيل الإشعارات';
+  pushTest.hidden = !enabled;
+  if(message) pushHelp.textContent = message;
+}
+function base64UrlToBytes(value){
+  const padded = (value + '='.repeat((4 - value.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/');
+  return Uint8Array.from(atob(padded), c => c.charCodeAt(0));
+}
+async function refreshPushStatus(){
+  try {
+    if(!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)){
+      pushToggle.disabled = true; setPushUi(false, 'هذا المتصفح لا يدعم إشعارات الويب. استخدم متصفحًا حديثًا يدعم الإشعارات.'); return;
+    }
+    const registration = await navigator.serviceWorker.register('/service-worker.js');
+    const currentSubscription = await registration.pushManager.getSubscription();
+    const endpoint = currentSubscription?.endpoint || '';
+    const data = await adminFetch('/api/push/status?endpoint=' + encodeURIComponent(endpoint));
+    if(!data.supported){ pushToggle.disabled = true; setPushUi(false, 'الإشعارات غير مهيأة على الخادم حاليًا.'); return; }
+    setPushUi(data.enabled);
+    if(Notification.permission === 'denied'){
+      pushStatus.textContent = 'حالة الإشعارات: محظورة من المتصفح';
+      pushHelp.textContent = 'افتح إعدادات الموقع في المتصفح، واسمح بالإشعارات، ثم أعد تحميل الصفحة.';
+    }
+  } catch(e) { if(adminToken) pushHelp.textContent = e.message; }
+}
+pushToggle.addEventListener('click', async ()=>{
+  pushToggle.disabled = true;
+  try {
+    if(!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) throw new Error('هذا المتصفح لا يدعم إشعارات الويب.');
+    if(Notification.permission === 'denied') throw new Error('الإشعارات محظورة. افتح إعدادات الموقع في المتصفح واسمح بالإشعارات، ثم أعد تحميل الصفحة.');
+    const registration = await navigator.serviceWorker.register('/service-worker.js');
+    let subscription = await registration.pushManager.getSubscription();
+    const currentStatus = await adminFetch('/api/push/status?endpoint=' + encodeURIComponent(subscription?.endpoint || ''));
+    if(subscription && currentStatus.enabled){
+      await adminFetch('/api/push/subscriptions', {method:'DELETE',body:JSON.stringify({endpoint:subscription.endpoint})});
+      await subscription.unsubscribe();
+      setPushUi(false, 'تم إيقاف الإشعارات على هذا الجهاز.');
+      return;
+    }
+    if(!currentStatus.supported || !currentStatus.publicKey) throw new Error('إعدادات الإشعارات غير مكتملة على الخادم.');
+    const permission = await Notification.requestPermission();
+    if(permission !== 'granted') throw new Error(permission === 'denied' ? 'تم رفض الإذن. افتح إعدادات الموقع في المتصفح واسمح بالإشعارات، ثم أعد تحميل الصفحة.' : 'لم يتم منح إذن الإشعارات.');
+    subscription = await registration.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:base64UrlToBytes(currentStatus.publicKey)});
+    await adminFetch('/api/push/subscriptions', {method:'POST',body:JSON.stringify({subscription:subscription.toJSON()})});
+    setPushUi(true, 'ستصل تنبيهات الطلبات الجديدة إلى هذا الجهاز ما دامت إعدادات المتصفح والنظام تسمح بها.');
+  } catch(e) { pushHelp.textContent = e.message; }
+  finally { pushToggle.disabled = false; }
+});
+pushTest.addEventListener('click', async ()=>{
+  pushTest.disabled = true;
+  try { await adminFetch('/api/push/test', {method:'POST',body:JSON.stringify({})}); pushHelp.textContent = 'تم إرسال إشعار تجريبي. قد يستغرق ظهوره لحظات.'; }
+  catch(e) { pushHelp.textContent = e.message; }
+  finally { pushTest.disabled = false; }
+});
 function renderStats(requests){
   const today = new Date().toDateString();
   const todayCount = requests.filter(r => new Date(r.createdAt).toDateString() === today).length;
@@ -266,7 +332,7 @@ document.getElementById('adminLoginForm').addEventListener('submit', async event
     if(!response.ok) throw new Error(data.message || 'تعذر تسجيل الدخول.');
     adminToken = data.token; currentUser = data.user; updateUserDisplay();
     sessionStorage.setItem('mousaAdminToken',adminToken); sessionStorage.setItem('mousaAdminUser',JSON.stringify(currentUser));
-    await loadRequests(); loginLayer.style.display = 'none';
+    await loadRequests(); loginLayer.style.display = 'none'; refreshPushStatus();
   } catch(e) { loginError.textContent = e.message; loginError.hidden = false; }
 });
 document.getElementById('statusForm').addEventListener('submit', async event=>{
@@ -277,7 +343,7 @@ document.getElementById('statusForm').addEventListener('submit', async event=>{
     document.getElementById('statusNote').value = ''; await loadRequests(); setTimeout(closeRequestModal, 700);
   } catch(e) { msg.textContent = e.message; msg.style.color = '#c62828'; msg.hidden = false; }
 });
-if(adminToken){ updateUserDisplay(); loadRequests().then(()=>{loginLayer.style.display='none';}).catch(()=>{sessionStorage.removeItem('mousaAdminToken');sessionStorage.removeItem('mousaAdminUser');adminToken='';loginLayer.style.display='flex';}); }
+if(adminToken){ updateUserDisplay(); loadRequests().then(()=>{loginLayer.style.display='none'; refreshPushStatus();}).catch(()=>{sessionStorage.removeItem('mousaAdminToken');sessionStorage.removeItem('mousaAdminUser');adminToken='';loginLayer.style.display='flex';}); }
 fetch('/api/auth/setup-status').then(r=>r.json()).then(d=>{if(d.setupRequired) {const p=document.createElement('p');p.style.cssText='margin:0;text-align:center';p.innerHTML='<a href="/setup.html">إنشاء حساب الإدارة لأول مرة</a>';document.getElementById('adminLoginForm').appendChild(p);}}).catch(()=>{});
 </script>
 </body>

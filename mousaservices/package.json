@@ -1,8 +1,13 @@
 {
-  "name":"citizen-service-mobile",
-  "version":"1.0.0",
-  "private":true,
-  "main":"server.js",
-  "scripts":{"start":"node server.js"},
-  "dependencies":{"express":"^4.21.2"}
+  "name": "citizen-service-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "web-push": "^3.6.7"
+  }
 }

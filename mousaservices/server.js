@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs/promises");
 const crypto = require("crypto");
+const webPush = require("web-push");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,6 +13,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const MAX_FILES = 5;
 const ALLOWED_FILE_TYPES = new Set([".jpg", ".jpeg", ".png", ".pdf"]);
 const USERS_FILE = path.join(DATA_DIR, "users.json");
+const PUSH_SUBSCRIPTIONS_FILE = path.join(DATA_DIR, "push-subscriptions.json");
 const sessions = new Map();
 
 const ALLOWED_STATUSES = [
@@ -39,6 +41,63 @@ const readRequests = () => readJsonFile(REQUESTS_FILE, []);
 const writeRequests = requests => writeJsonFile(REQUESTS_FILE, requests);
 const readUsers = () => readJsonFile(USERS_FILE, []);
 const writeUsers = users => writeJsonFile(USERS_FILE, users);
+const readPushSubscriptions = () => readJsonFile(PUSH_SUBSCRIPTIONS_FILE, []);
+async function writePushSubscriptions(subscriptions) {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  const temporaryFile = `${PUSH_SUBSCRIPTIONS_FILE}.${crypto.randomUUID()}.tmp`;
+  try {
+    await fs.writeFile(temporaryFile, JSON.stringify(subscriptions, null, 2), { encoding: "utf8", flag: "wx" });
+    await fs.rename(temporaryFile, PUSH_SUBSCRIPTIONS_FILE);
+  } finally {
+    await fs.unlink(temporaryFile).catch(() => {});
+  }
+}
+
+function getVapidConfig() {
+  const { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT } = process.env;
+  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY || !VAPID_SUBJECT) return null;
+  try {
+    webPush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+    return { publicKey: VAPID_PUBLIC_KEY };
+  } catch (error) {
+    console.error("Web Push VAPID configuration is invalid.");
+    return null;
+  }
+}
+
+function validPushSubscription(subscription) {
+  if (!subscription || typeof subscription !== "object" || Array.isArray(subscription)) return false;
+  try {
+    const endpoint = new URL(subscription.endpoint);
+    const host = endpoint.hostname.toLowerCase();
+    const allowedPushHost = host === "fcm.googleapis.com" || host === "updates.push.services.mozilla.com" ||
+      host === "web.push.apple.com" || host.endsWith(".push.apple.com") || host.endsWith(".notify.windows.com");
+    return endpoint.protocol === "https:" && allowedPushHost && endpoint.href.length <= 2048 &&
+      typeof subscription.keys?.p256dh === "string" && subscription.keys.p256dh.length <= 200 &&
+      typeof subscription.keys?.auth === "string" && subscription.keys.auth.length <= 100;
+  } catch { return false; }
+}
+
+async function sendNewRequestPush(requestId) {
+  if (!getVapidConfig()) return;
+  try {
+    const subscriptions = await readPushSubscriptions();
+    const payload = JSON.stringify({ title: "طلب جديد", body: `تم استلام طلب جديد — رقم الطلب: ${requestId}`, url: "/admin.html" });
+    const results = await Promise.allSettled(subscriptions.map(async item => {
+      try {
+        await webPush.sendNotification(item.subscription, payload);
+      } catch (error) {
+        if (error.statusCode === 404 || error.statusCode === 410) return { endpoint: item.subscription.endpoint, expired: true };
+        console.error(`Push delivery failed (HTTP ${Number(error.statusCode) || "unknown"}).`);
+      }
+      return null;
+    }));
+    const expired = new Set(results.filter(result => result.status === "fulfilled" && result.value?.expired).map(result => result.value.endpoint));
+    if (expired.size) await writePushSubscriptions(subscriptions.filter(item => !expired.has(item.subscription.endpoint)));
+  } catch (error) {
+    console.error("Could not complete push delivery or clean up subscriptions.");
+  }
+}
 
 function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
   const hash = crypto.scryptSync(password, salt, 64).toString("hex");
@@ -163,6 +222,76 @@ app.post("/api/auth/logout", (req, res) => {
   res.json({ success: true });
 });
 
+app.get("/api/push/status", requireAdmin, async (req, res) => {
+  try {
+    const config = getVapidConfig();
+    const subscriptions = await readPushSubscriptions();
+    const endpoint = req.query.endpoint;
+    const enabled = typeof endpoint === "string" && subscriptions.some(item => item.employeeId === req.user.id && item.subscription?.endpoint === endpoint);
+    res.json({ success: true, supported: Boolean(config), publicKey: config?.publicKey || null, enabled });
+  } catch (error) {
+    console.error("Could not read push notification status.");
+    res.status(500).json({ success: false, message: "تعذر قراءة حالة الإشعارات." });
+  }
+});
+
+app.post("/api/push/subscriptions", requireAdmin, async (req, res) => {
+  const subscription = req.body?.subscription;
+  if (!validPushSubscription(subscription)) return res.status(400).json({ success: false, message: "بيانات الاشتراك في الإشعارات غير صحيحة." });
+  try {
+    const subscriptions = await readPushSubscriptions();
+    const savedAt = new Date().toISOString();
+    const record = { employeeId: req.user.id, employeeName: req.user.name, subscription, savedAt };
+    const existingIndex = subscriptions.findIndex(item => item.subscription?.endpoint === subscription.endpoint);
+    if (existingIndex >= 0) subscriptions[existingIndex] = record;
+    else subscriptions.push(record);
+    await writePushSubscriptions(subscriptions);
+    res.json({ success: true, enabled: true });
+  } catch (error) {
+    console.error("Could not save a push subscription.");
+    res.status(500).json({ success: false, message: "تعذر حفظ الاشتراك في الإشعارات." });
+  }
+});
+
+app.delete("/api/push/subscriptions", requireAdmin, async (req, res) => {
+  const endpoint = req.body?.endpoint;
+  if (typeof endpoint !== "string" || endpoint.length > 2048) return res.status(400).json({ success: false, message: "عنوان الاشتراك غير صحيح." });
+  try {
+    const subscriptions = await readPushSubscriptions();
+    await writePushSubscriptions(subscriptions.filter(item => item.employeeId !== req.user.id || item.subscription?.endpoint !== endpoint));
+    res.json({ success: true, enabled: false });
+  } catch (error) {
+    console.error("Could not remove a push subscription.");
+    res.status(500).json({ success: false, message: "تعذر إيقاف الإشعارات." });
+  }
+});
+
+app.post("/api/push/test", requireAdmin, async (req, res) => {
+  if (!getVapidConfig()) return res.status(503).json({ success: false, message: "إعدادات الإشعارات غير مكتملة على الخادم." });
+  try {
+    const allSubscriptions = await readPushSubscriptions();
+    const subscriptions = allSubscriptions.filter(item => item.employeeId === req.user.id);
+    if (!subscriptions.length) return res.status(404).json({ success: false, message: "فعّل الإشعارات على هذا الجهاز أولًا." });
+    const expired = new Set();
+    const deliveries = await Promise.all(subscriptions.map(async item => {
+      try {
+        await webPush.sendNotification(item.subscription, JSON.stringify({ title: "اختبار الإشعارات", body: "تم تفعيل الإشعارات على هذا الجهاز بنجاح.", url: "/admin.html" }));
+        return true;
+      } catch (error) {
+        if (error.statusCode === 404 || error.statusCode === 410) expired.add(item.subscription.endpoint);
+        else console.error(`Push test delivery failed (HTTP ${Number(error.statusCode) || "unknown"}).`);
+        return false;
+      }
+    }));
+    if (expired.size) await writePushSubscriptions(allSubscriptions.filter(item => !expired.has(item.subscription?.endpoint)));
+    if (!deliveries.some(Boolean)) return res.status(502).json({ success: false, message: "تعذر تسليم الإشعار التجريبي. تحقق من اتصال الجهاز وإعدادات الإشعارات." });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Could not send a test notification.");
+    res.status(500).json({ success: false, message: "تعذر إرسال إشعار الاختبار." });
+  }
+});
+
 app.get("/api/requests", requireAdmin, async (req, res) => {
   try { res.json({ success: true, requests: await readRequests() }); }
   catch (error) { console.error(error); res.status(500).json({ success: false, message: "حدث خطأ أثناء قراءة الطلبات." }); }
@@ -231,7 +360,13 @@ app.post("/api/requests", parseRequestMultipart, async (req, res) => {
   try {
     const { name, phone, type, details } = req.body || {};
     if (![name, phone, type, details].every(value => typeof value === "string" && value.trim())) return res.status(400).json({ success: false, message: "برجاء إدخال جميع البيانات المطلوبة." });
+    const submissionKey = req.get("Idempotency-Key");
+    if (submissionKey && !/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(submissionKey)) return res.status(400).json({ success: false, message: "معرّف إرسال الطلب غير صحيح." });
     const requests = await readRequests();
+    if (submissionKey) {
+      const existingRequest = requests.find(item => item.submissionKey === submissionKey);
+      if (existingRequest) return res.status(201).json({ success: true, message: "تم تقديم الطلب بنجاح.", request: { id: existingRequest.id, status: existingRequest.status, createdAt: existingRequest.createdAt } });
+    }
     const now = new Date().toISOString();
     const requestId = generateRequestId(requests);
     const savedAttachments = [];
@@ -242,9 +377,10 @@ app.post("/api/requests", parseRequestMultipart, async (req, res) => {
         await fs.writeFile(path.join(UPLOADS_DIR, storedName), file.content, { flag: "wx" });
         savedAttachments.push({ id: crypto.randomUUID(), originalName: file.originalName, storedName, size: file.content.length, type: file.ext === ".pdf" ? "application/pdf" : file.ext === ".png" ? "image/png" : "image/jpeg" });
       }
-      const request = { id: requestId, name: name.trim(), phone: phone.trim(), type: type.trim(), details: details.trim(), attachments: savedAttachments, status: "جديد", createdAt: now, updatedAt: now, history: [{ status: "جديد", note: "تم استلام الطلب.", employee: "النظام", timestamp: now }] };
+      const request = { id: requestId, ...(submissionKey ? { submissionKey } : {}), name: name.trim(), phone: phone.trim(), type: type.trim(), details: details.trim(), attachments: savedAttachments, status: "جديد", createdAt: now, updatedAt: now, history: [{ status: "جديد", note: "تم استلام الطلب.", employee: "النظام", timestamp: now }] };
       requests.push(request);
       await writeRequests(requests);
+      void sendNewRequestPush(request.id);
       res.status(201).json({ success: true, message: "تم تقديم الطلب بنجاح.", request: { id: request.id, status: request.status, createdAt: request.createdAt } });
     } catch (error) {
       await Promise.all(savedAttachments.map(file => fs.unlink(path.join(UPLOADS_DIR, file.storedName)).catch(() => {})));
