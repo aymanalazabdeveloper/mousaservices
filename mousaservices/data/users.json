@@ -18,5 +18,25 @@
     "salt": "c81c666a68770239a5518f7140ae745c",
     "passwordHash": "946faf816b70437e0cf8235a580e8b6a120ed152807cd1ac1179173a0b9bb0b09467ede67e6369799d038726d7387b1bc55bf3491ff81af322bbeffc459cfb76",
     "createdAt": "2026-10-09T18:50:04.144Z"
+  },
+  {
+    "id": "c11a84b3-6317-426d-aa6b-35fec54002ab",
+    "username": "Ibrahim",
+    "name": "Ibrahim Mohamed Mousa",
+    "role": "employee",
+    "active": true,
+    "salt": "9e05698c1b7d5c143dc24582854c9780",
+    "passwordHash": "903049f9ade555b32800a981e83c8ea8d77deefb6ddc709ea78a47615c2cfb2e1fdf35ce649103bd2750efc1c67214037dc29d1ed27ebcf100fb85ffde660939",
+    "createdAt": "2026-10-13T18:37:39.704Z"
+  },
+  {
+    "id": "b29c0f3c-10a0-4773-b31b-42a6ffc0372e",
+    "username": "Eleraky",
+    "name": "Ahmed Eleraky",
+    "role": "employee",
+    "active": true,
+    "salt": "5475ef36ce365f1452fa8e030e785d63",
+    "passwordHash": "3365dd414be3f4966f8f403b96b4bd5cc66abda7d3f1092c5b0dba466926dc8694dd7087cd437a680ebd8fa03a9c2ca39a3eedf1382b3ee1b7caf84344962b3b",
+    "createdAt": "2026-10-22T02:43:34.603Z"
   }
 ]

@@ -11,5 +11,56 @@
       }
     },
     "savedAt": "2026-10-12T16:49:48.668Z"
+  },
+  {
+    "employeeId": "395a4c17-5ddf-472f-a5b2-3b83de3828d0",
+    "employeeName": "Admin",
+    "subscription": {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/dZZKY2Td9EA:APA91bGiYGnFD039t46OReIRky84j9s7HKi-rCL-U7S96URfu8IgyPkWKXC9cYMoPeaBkup5Vix5-cgsL4rqcP6rIyZyKp84i7kywPHSBRv4sbReyDALVlruIPOwSFE0X4Dk3aPbf7Ep",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BAA_WWX0N4kSVFM_rhXMtuZ4RRudVYxt30ni7egSxN9dsmm1E9S_Gs-b4MbkwlhNH-WL_UHPWNKHQB9KWyA7_0k",
+        "auth": "qVuMiZws1xO1VR-CnQ-XvQ"
+      }
+    },
+    "savedAt": "2026-10-12T21:28:11.932Z"
+  },
+  {
+    "employeeId": "395a4c17-5ddf-472f-a5b2-3b83de3828d0",
+    "employeeName": "Admin",
+    "subscription": {
+      "endpoint": "https://web.push.apple.com/QHJzrEBUzWkHlZSR3lqO7cZZv0HBGG1PbKaznDS_agQ6akwdxXK3jcMNdNKBg3rWaoWoxlYXpPXmDUURT2hQ9Ldor_ZskZb47U9gj1B7LLmHXu4m30Q-jis6qcl_EvWOKMN3NEQnD2pBOKRNyyBIVwGpkjmcTNGxcrRhSPlzMrw",
+      "keys": {
+        "p256dh": "BC-2DrRIbCCUWxtRzKNzJpbMDP6C5hgP-R19a4ZBQsHgTqZ3abUTR3EO_caQqqzuoKbPJZcJcfDu4o3Ve9woUJ8",
+        "auth": "TiY-eXRWJ-DrPGBMI4G8Zg"
+      }
+    },
+    "savedAt": "2026-10-12T22:44:20.361Z"
+  },
+  {
+    "employeeId": "c11a84b3-6317-426d-aa6b-35fec54002ab",
+    "employeeName": "Ibrahim Mohamed Mousa",
+    "subscription": {
+      "endpoint": "https://wns2-par02p.notify.windows.com/w/?token=BQYAAADYt13w3wBEZ6i472SDvQWF%2feQdpIDi6N%2fjYB2wp40CrdFRsopYh7d%2fFdkyzur%2bEe0p4i4Lm6EAjfTQplvIjK8fpMrYS0xzpjhfj9acfWuOY5icH0SNGGbSpwRuOinfhx4gcEpAGKzu4NNsb8i%2b%2fYL8rNhPVKsoXwg2KbEdIdZBFciq%2btLfB0EcQ%2fJWDlv8yfIplz34b1SdyXHUw%2byhON9JKrhMWlUJPeT6%2fozTZGEDJrhQ3kJ%2bLOsrGVnYBuVhVE6mw1idqeznBWW4tngAg2f9ZstmEHjO4fUzlBAG7LB3gNn0z4IOo210HyaNR4AoYqg%2bj7gEhUoViSQa7e2dmbcR",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BMAinqZkQ0ETWgfnPLRAjIeyoczRc-kiQZip7NrhmhT0Yn0y73TF3Lv7S3qGNkrpRfnVjLUDWvZrpfkGunQguk4",
+        "auth": "jOgXWnQC5AIwQH1_zPIM2w"
+      }
+    },
+    "savedAt": "2026-10-13T18:45:43.296Z"
+  },
+  {
+    "employeeId": "395a4c17-5ddf-472f-a5b2-3b83de3828d0",
+    "employeeName": "Admin",
+    "subscription": {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/dA8VZJ7-e00:APA91bHtPfosObVAZo8EtVrdaGEL3Mx2XZxluq6bbSsvWSVeNToJaxpPRsGrvQxTioczsX-WrvM9l4yfORzBT_nWi1pJFU6VVB9rWEkmdPLhlQSGeUp8aKS5yNeKLkea3J3sMQ44WRIH",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BAzwzcx9y_g0BqbUue6RzLUoWivz2CUsIhk_intLtWKON3REufdNKmunNuYL1hILRGXTiPeZdDr4fALVWuNXg40",
+        "auth": "Xu3ueRSheiW1zoNQiyPyBw"
+      }
+    },
+    "savedAt": "2026-10-18T06:41:58.187Z"
   }
 ]
